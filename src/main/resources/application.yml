@@ -1,0 +1,29 @@
+okta:
+  oauth2:
+    issuer: https://dev-zycrb3xraiz8ecye.us.auth0.com/
+    client-id: 5WGm3KpKgJRJ5pzRJMZu73icKgWYqz39
+    client-secret: y5ncqYmrCqm5htjYip1iuHHpgjBaI_zjxH5b9srQHagGIKpSZjV6XzVtC1s74gN8
+
+# The sample and instructions above for the callback and logout URL configuration use port 3000.
+# If you wish to use a different port, change this and be sure your callback and logout URLs are
+# configured with the correct port.
+spring:
+  datasource:
+    username: postgres
+    password: q1w2e3r4t5
+    driverClassName: org.postgresql.Driver
+    driverDialect: org.hibernate.dialect.PostgreSQL82Dialect
+    url: jdbc:postgresql://localhost/lab2
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+logging:
+  level:
+    root: ERROR
+    org.springframework.web: ERROR
+    com.auth0.example: TRACE
+
+server:
+  port: 3000

@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<meta charset="utf-8">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Goods</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            position: relative; /* Add position relative for positioning the basket */
+            height: 100%;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            top:20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .goods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .good {
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .good-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .good-price {
+            color: #555;
+        }
+        .good-image {
+            width: 150px; /* Adjust size as needed */
+            height: 150px;
+            margin-right: 10px;
+        }
+
+        .good-image img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .good-details {
+            flex: 1;
+        }
+        .add-to-cart-button {
+            margin-top: auto;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .add-to-cart-button:hover {
+            background-color: #45a049;
+        }
+
+
+        .basket-icon {
+
+        }
+        .icon-container {
+            display: flex;
+            align-items: center;
+
+            justify-content: end;
+            gap: 20px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: auto;
+        }
+
+        .basket-icon,
+        .additem-icon {
+            display: flex;
+            align-items: center;
+        }
+
+        .additem-icon {
+            justify-content: flex-end; /* Aligns the additem-icon to the right within its container */
+        }
+
+
+        .basket-icon {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .additem-icon {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .basket-icon .badge {
+            position: absolute;
+            top: 0;
+            right: -15px;
+            background-color: red;
+        }
+        .modal-content {
+            border-radius: 8px;
+        }
+
+        .modal-header {
+            border-bottom: none;
+        }
+
+        .modal-footer {
+            border-top: none;
+        }
+        #successMessage {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #successMessage.show {
+            display: block;
+            opacity: 1;
+        }
+        .pagination-container {
+            display: flex;
+            justify-content: flex-end; /* Align buttons to the right */
+        }
+
+        .pagination-container button {
+            margin-left: 5px; /* Add some spacing between buttons */
+        }
+        .basket-items-container {
+            position: absolute;
+            top: 40px; /* Adjust as needed */
+            right: 0;
+            width: 200px; /* Adjust as needed */
+            max-height: 200px; /* Limit the height */
+            overflow-y: auto; /* Enable vertical scrolling */
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            display: none; /* Hide by default */
+        }
+
+        .basket-items-container.show {
+            display: block; /* Show the container */
+        }
+
+        .basket-items-container div {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .basket-items-container div:last-child {
+            border-bottom: none;
+        }
+
+
+
+
+        header {
+            background-color: #ffffff;
+            color: #333333;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            text-align: center;
+            flex-grow: 1; /* Allow logo to grow and take up available space */
+        }
+
+        .logo img {
+            height: 80px;
+        }
+
+
+
+
+        .basket-icon {
+            margin-right: 20px; /* Adjust the spacing between the basket icon and the add item button */
+        }
+        .main-content{
+            padding-top: 180px;
+        }
+
+        .footer {
+            background-color: #ffffff;
+            color: #333333;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        footer h5 {
+            margin-top: 0;
+        }
+
+        footer p {
+            margin-bottom: 5px;
+        }
+
+        .social-icons {
+            padding: 0;
+            list-style: none;
+        }
+
+        .social-icons li {
+            display: inline;
+            margin-right: 10px;
+        }
+
+        .social-icons li:last-child {
+            margin-right: 0;
+        }
+        #fileDropArea {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #fileDropArea.dragover {
+            background-color: #f0f0f0;
+        }
+
+        .form-group{
+            width: 100%;
+        }
+
+        .product-details {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            display: flex;
+
+
+        }
+        .product-details img {
+            width: 100%;
+            max-height: 600px;
+            border-radius: 5px;
+
+        }
+        .product-details .text {
+            display: flex;
+            flex-direction: column;
+        }
+        .product-details h2 {
+            margin-top: 0;
+        }
+        .product-details p {
+            margin: 0;
+        }
+
+        .review-form {
+
+
+            margin: 20px auto;
+            max-width: 100%;
+            padding: 20px;
+            position: relative;
+
+        }
+        .review-form h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        textarea,
+        select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            padding: 10px;
+            width: 100%;
+        }
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23444444" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 12L6 8h8l-4 4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 14px;
+            padding-right: 30px;
+        }
+        textarea {
+            resize: vertical;
+        }
+        button[type="submit"] {
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+
+        .txt-center {
+            text-align: center;
+        }
+        .hide {
+            display: none;
+        }
+
+        .clear {
+            float: none;
+            clear: both;
+        }
+
+        .rating {
+            width: 90px;
+            unicode-bidi: bidi-override;
+            direction: rtl;
+            text-align: center;
+            position: relative;
+        }
+
+        .rating > label {
+            float: right;
+            display: inline;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            width: 1.1em;
+            cursor: pointer;
+            color: #000;
+        }
+
+        .rating > label:hover,
+        .rating > label:hover ~ label,
+        .rating > input.radio-btn:checked ~ label {
+            color: transparent;
+        }
+
+        .rating > label:hover:before,
+        .rating > label:hover ~ label:before,
+        .rating > input.radio-btn:checked ~ label:before,
+        .rating > input.radio-btn:checked ~ label:before {
+            content: "\2605";
+            position: absolute;
+            left: 0;
+            color: #FFD700;
+        }
+
+        .review-content{
+            background-color: #f9f9f9;
+            padding: 10px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .basket-icon {
+            cursor: pointer;
+        }
+
+
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .product {
+            width: calc(20% - 10px); /* 20% width with margin between items */
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: stretch;
+        }
+
+        .product img {
+            width: 100%; /* Make the image fill the container */
+            border-radius: 5px;
+            margin-bottom: 10px;
+            max-height: 600px;
+        }
+
+        .product span {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .product span:last-child {
+            margin-bottom: 0;
+        }
+
+        .buy-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .buy-button:hover {
+            background-color: #0056b3;
+        }
+
+        @media screen and (max-width: 768px) {
+            .product {
+                width: calc(50% - 10px); /* Two items per row on smaller screens */
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .product {
+                width: 100%; /* Single item per row on extra small screens */
+            }
+        }
+
+        .product-text{
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .orders-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .order {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .order-info {
+            font-weight: bold;
+        }
+
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .product {
+            flex: 0 0 calc(33.33% - 20px); /* Adjust as needed for desired product width */
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .product-image {
+            width: 100%;
+            height: auto;
+            max-height: 150px; /* Adjust as needed for desired image height */
+            object-fit: cover;
+        }
+
+        .product-name,
+        .product-price {
+            display: block;
+            margin-top: 5px;
+        }
+
+        .remove-button {
+            padding: 5px; /* Adjust padding as needed */
+        }
+
+        .remove-button:hover {
+            background-color: #f8d7da; /* Light red background on hover */
+            border-color: #c82333; /* Darker red border color on hover */
+            color: #721c24; /* Dark text color on hover */
+        }
+        .review-form {
+            max-width: 400px; /* Adjust the width as needed */
+            margin: 0 auto; /* Center the review form horizontally */
+        }
+
+        #submitButton {
+            width: 100%; /* Make the button fill the width of its container */
+            max-width: 200px; /* Limit the maximum width of the button */
+            margin: 0 auto; /* Center the button horizontally */
+        }
+        #existingReviews{
+            padding: 10px;
+        }
+        button.buy-button {
+            background-color: #4CAF50; /* Green background */
+            border: none;
+            color: white; /* White text */
+            padding: 15px 32px; /* Padding */
+            text-align: center; /* Centered text */
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px; /* Font size */
+            margin: 4px 2px; /* Margin */
+            cursor: pointer; /* Pointer cursor */
+            border-radius: 10px; /* Rounded corners */
+        }
+
+        /* Change the color of the buy button on hover */
+        button.buy-button:hover {
+            background-color: #45a049;
+        }
+        .confirmation-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            padding: 20px;
+            border: 2px solid #333333;
+            border-radius: 8px;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .confirmation-dialog p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .confirmation-dialog button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .confirmation-dialog button:hover {
+            background-color: #0056b3;
+        }
+        /* Remaining styles */
+
+        /* Flex container */
+        .flex-container {
+            display: flex;
+        }
+
+        /* Left column */
+        .left-column {
+            flex: 2;
+            background-color: #f2f2f2; /* Light gray background */
+            padding: 20px; /* Add padding for spacing */
+        }
+
+        /* Right column */
+        .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #e6e6e6; /* Light gray background */
+            padding: 20px; /* Add padding for spacing */
+        }
+
+        /* Checkout section */
+        .checkout-section {
+            width: 60%; /* Adjust width as needed */
+            text-align: center; /* Center content */
+        }
+        .order-info {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        #toggle-delivered-orders {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+
+        }
+
+        #toggle-delivered-orders:hover {
+            background-color: #45a049; /* Darker Green */
+        }
+        select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            font-size: 16px;
+            appearance: none; /* Remove default arrow */
+            background-image: url('data:image/svg+xml;utf8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Custom arrow */
+            background-repeat: no-repeat;
+            background-position: right 8px top 50%;
+            background-size: 24px;
+            cursor: pointer;
+            width: 200px; /* Adjust width as needed */
+            margin: 10px;
+        }
+
+        /* Style for select options */
+        select option {
+            padding: 8px;
+            font-size: 16px;
+            background-color: #fff; /* Background color for options */
+            color: #333; /* Text color for options */
+        }
+
+        /* Style for select when open */
+        select:focus {
+            outline: none; /* Remove default focus outline */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1); /* Add shadow when focused */
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff; /* Blue color */
+            color: #fff; /* White text color */
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Smooth transition */
+        }
+
+        /* Style for the button on hover */
+        button:hover {
+            background-color: #0056b3; /* Darker blue color */
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <!-- Logo or website name -->
+    <div class="logo">
+        <img src="https://img.freepik.com/free-vector/bird-colorful-logo-gradient-vector_343694-1365.jpg?size=338&ext=jpg&ga=GA1.1.523418798.1711843200&semt=ais" alt="Logo" onclick="displayMainPage()">
+        <!-- If using text instead of an image, use <h1> or <p> -->
+    </div>
+
+
+
+    <!-- Icon Container -->
+    <div class="icon-container">
+        <li sec:authorize="!isAuthenticated()" class="nav-item">
+            <a th:href="@{/oauth2/authorization/okta}" id="qsLoginBtn" class="btn btn-primary btn-margin">Login</a>
+        </li>
+        <div class="history-icon">
+            <button type="button" class="btn btn-primary" onclick="getAllOrders()" id="get-all-orders" style="display:none;">
+                Change order status(for admin only)
+            </button>
+        </div>
+        <div class="history-icon">
+            <button type="button" class="btn btn-primary" onclick="showOrdersHistory()">
+                History of orders
+            </button>
+        </div>
+        <!-- Basket Icon -->
+        <div class="basket-icon" onmouseover="displayBasketItems()" onclick="showBasketItems()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-cart">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="badge badge-pill badge-primary" id="cartItemCount">0</span>
+        </div>
+        <div id="basketItemsContainer" class="basket-items-container">
+            <!-- Basket items will be displayed here -->
+        </div>
+        <!-- Add Item Button -->
+        <div class="additem-icon" id="additem" style="display:none;">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addItemModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M8 1a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-1 0v-13A.5.5 0 0 1 8 1zm7 7a.5.5 0 0 1-.5.5H2a.5.5 0 0 1 0-1h13a.5.5 0 0 1 .5.5z"/>
+                </svg>
+            </button>
+        </div>
+
+    </div>
+</header>
+
+
+<div class="main-content" >
+
+    <div class="container" id="home">
+        <h1>List of Goods</h1>
+
+        <div class="goods-grid" id="goodsGrid"></div>
+        <div class="pagination-container mt-3">
+            <button id="previousPageButton" class="btn btn-secondary mr-2" disabled>Previous Page</button>
+            <button id="loadMoreButton" class="btn btn-primary">Load More</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="successMessage" class="alert alert-success fade" role="alert">
+    Item successfully added!
+</div>
+
+
+<div id="itemsInCart" class="itemsInCart">
+    <div class="flex-container">
+        <div class="left-column">
+            <h1>Your Shopping Basket</h1>
+            <div id="itemsInCartContainer" class="products-container">
+                <!-- Items in cart will be displayed here -->
+            </div>
+        </div>
+        <div class="right-column">
+            <div class="checkout-section" id="checkoutSection">
+                <h2>Checkout</h2>
+                <p>Total Price: <span id="totalPrice"></span></p>
+                <p>Order Date: <span id="orderDate"></span></p>
+                <button class="buy-button" onclick="buy()">Buy</button>
+            </div>
+        </div>
+    </div>
+    <div class="confirmation-dialog" id="confirmationDialog" style="display: none">
+        <p>Are you sure you want to proceed with the purchase?</p>
+        <p id="total-price"></p>
+        <label for="addressInput">Address:</label>
+        <input type="text" id="addressInput" placeholder="Enter your address">
+        <button id="confirmBtn">Yes</button>
+        <button id="cancelBtn">Cancel</button>
+
+    </div>
+</div>
+<div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addItemModalLabel">Add New Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Form for adding new item -->
+                <form id="addItemForm">
+                    <div class="form-group">
+                        <label for="itemName">Name</label>
+                        <input type="text" class="form-control" id="itemName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemPrice">Price</label>
+                        <input type="number" class="form-control" id="itemPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemQuantity">Quantity Available</label>
+                        <input type="number" class="form-control" id="itemQuantity" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemDescription">Description</label>
+                        <textarea class="form-control" id="itemDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group" id="fileDropArea">
+                        <label for="fileUploader">Drag & Drop or Click to Upload File</label>
+                        <input type="file" class="form-control-file" id="fileUploader">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addItem()">Add Item</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="display: none" id="product-details">
+    <div class="product-details" id="goodDetails" >
+
+
+    </div>
+    <div class="review-form">
+        <h2>Leave a Review</h2>
+        <form id="reviewForm">
+            <div class="form-group">
+                <div class="rating">
+                    <input id="star5" name="star" type="radio" value="5" class="radio-btn hide" />
+                    <label for="star5" >&#9733;</label>
+                    <input id="star4" name="star" type="radio" value="4" class="radio-btn hide" />
+                    <label for="star4" >&#9733;</label>
+                    <input id="star3" name="star" type="radio" value="3" class="radio-btn hide" />
+                    <label for="star3" >&#9733;</label>
+                    <input id="star2" name="star" type="radio" value="2" class="radio-btn hide" />
+                    <label for="star2" >&#9733;</label>
+                    <input id="star1" name="star" type="radio" value="1" class="radio-btn hide" />
+                    <label for="star1" >&#9733;</label>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="review">Your Review:</label>
+                <textarea id="review" name="review"></textarea>
+            </div>
+
+        </form>
+        <button type="submit" id="submitButton" onclick="addReview()">Submit Review</button>
+        <div id="existingReviews">
+            <h2>Existing Reviews</h2>
+            <div id="reviewsList"></div>
+        </div>
+    </div>
+
+</div>
+
+<div id="history-of-orders" style="display: none">
+    <h1>Order history</h1>
+    <button id="toggle-delivered-orders" onclick="toggleDeliveredOrders()">Show Delivered Orders</button>
+    <div id="history-of-orders-container" class="orders-container"></div>
+</div>
+<div id="orders" class="orders-container"></div>
+
+<footer class="footer">
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Contact Information</h5>
+            <p>Email: example@example.com</p>
+            <p>Phone: +1234567890</p>
+            <p>Address: 123 Main St, City, Country</p>
+        </div>
+        <div class="col-md-6">
+            <h5>Follow Us</h5>
+            <ul class="list-inline social-icons">
+                <li class="list-inline-item"><a href="https://www.facebook.com/Amazon/?locale=ru_RU"><i class="bi bi-facebook"></i></a></li>
+                <li class="list-inline-item"><a href="https://twitter.com/amazon"><i class="bi bi-twitter"></i></a></li>
+                <li class="list-inline-item"><a href="https://www.instagram.com/amazon/"><i class="bi bi-instagram"></i></a></li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+<script>
+    var currentPage = 1;
+    var itemsPerPage = 15;
+    var role;
+    var userId  = "auth0|6626b904e9b671d81727a673";
+    function hideAllFragments(name){
+        document.getElementById('itemsInCart').style.display = 'none';
+        document.getElementById('home').style.display = 'none';
+        document.getElementById('product-details').style.display = 'none';
+        document.getElementById('history-of-orders').style.display = 'none';
+        document.getElementById('orders').style.display = 'none';
+
+        document.getElementById(name).style.display = 'block';
+
+    }
+    const compareDates = (a, b) => {
+        return new Date(b.order_date) - new Date(a.order_date);
+    };
+    function getElementFromCart(product_id, collection){
+        let res;
+        console.log(collection);
+        collection.forEach(element => {
+            console.log(element);
+            if(element.productId.toString()===product_id.toString()){
+
+                res = element;
+            }
+        });
+        return res
+    }
+    function parseDate(dateString) {
+        const months = {
+            "янв.": 0, "февр.": 1, "мар.": 2, "апр.": 3, "мая": 4, "июн.": 5,
+            "июл.": 6, "авг.": 7, "сент.": 8, "окт.": 9, "нояб.": 10, "дек.": 11
+        };
+
+        const [monthStr, day, year] = dateString.split(' ');
+        const month = months[monthStr];
+
+        return new Date(year, month, day.replace(',', ''));
+    }
+    const countDuplicates = (arr) => {
+        // Let's use a JavaScript object to keep track of counts
+        const counts = {};
+
+        // Loop through each element in the array
+        arr.forEach((value) => {
+
+            // If the value is encountered for the first time, set the count to 1
+            if (!counts[value.productId]) {
+                counts[value.productId] = 1;
+            } else {
+                // If the value has been seen before, increment the count
+                counts[value.productId]++;
+            }
+        });
+        const res = [];
+        Object.keys(counts).forEach((object) =>{
+            res.push({product: getElementFromCart(object, arr), quantity: counts[object]});
+        });
+
+        return res;
+    };
+
+    function setCurrentLocation(location_name) {
+        var url = new URL(window.location.href);
+        url.searchParams.set('location', location_name);
+        window.history.replaceState({}, '', url);
+
+    }
+    function clearSearchParams() {
+        var url = new URL(window.location.href);
+
+        // Get a copy of all search parameters
+        var searchParamsCopy = new URLSearchParams(url.search);
+
+        // Loop through each search parameter in the copy and delete it
+        searchParamsCopy.forEach((value, key) => {
+            if(key!=="userId" && key!=="accessToken"){
+                url.searchParams.delete(key);
+            }
+
+        });
+
+        window.history.replaceState({}, '', url);
+
+        console.log("Search parameters cleared");
+    }
+
+
+    function getUserIdFromToken(userId) {
+
+
+        // Split the token into its parts
+       /* const tokenParts = userId.split('.');
+
+        // Decode the payload (the second part of the token)
+        const payload = JSON.parse(atob(tokenParts[1]));
+
+        // Extract the user ID from the payload
+        const res = payload.sub; // 'sub' is the standard claim for the subject (user ID)
+        console.log(res);*/
+        return userId;
+    }
+
+    function imageToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
+    let showDeliveredOnly = false;
+    function showOrdersHistory() {
+        clearSearchParams();
+        setCurrentLocation("order_history");
+        setCurrentClientId(16);
+        hideAllFragments("history-of-orders");
+
+
+        let data = {
+            userId : getUserIdFromToken(userId)
+        }
+        fetch('/FetchOrders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Set the content type based on your data format
+            },
+            body: JSON.stringify(data) // Convert your data to JSON format
+        })
+            .then(response => response.json()) // Parse the JSON response
+            .then(data => {
+
+                console.log(data);
+                displayOrderHistoryOfUser(data);
+                console.log(data);
+                data.sort(function (a, b) {
+
+                    let dateA = (a.order_date);
+                    let dateB = (b.order_date);
+
+                    // Compare the dates
+                    return dateA - dateB;
+                });
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('Error:', error);
+            });
+        console.log("showOrdersHistory");
+    }
+    function toggleDeliveredOrders() {
+        showDeliveredOnly = !showDeliveredOnly;
+        const button = document.getElementById('toggle-delivered-orders');
+        if (showDeliveredOnly) {
+            button.textContent = 'Show All Orders';
+            filterOrdersByStatus('Delivered');
+        } else {
+            button.textContent = 'Show Delivered Orders';
+            showOrdersHistory();
+        }
+    }
+
+    function filterOrdersByStatus(status) {
+        let data = {
+            userId : getUserIdFromToken(userId)
+        }
+        hideAllFragments("history-of-orders");
+        fetch('/FetchOrders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Set the content type based on your data format
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                data = data.listOfOrders
+                const filteredOrders = data.filter(order => order.status === status);
+                displayOrderHistoryOfUser(filteredOrders);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+    function displayOrderHistoryOfUser(orders){
+        console.log("displayOrderHistoryOfUser");
+        const historyContainer = document.getElementById('history-of-orders-container');
+        historyContainer.innerHTML = '';
+
+        orders.forEach(order => {
+            console.log(order);
+            const orderDiv = document.createElement('div');
+            orderDiv.classList.add('order');
+
+            const orderInfo = document.createElement('div');
+            orderInfo.innerHTML = `<p class="order-info">Order ID: ${order.orderId}, Date: ${order.orderDate}, Status: ${order.status}</p>`;
+            const h1 = document.createElement('p');
+            h1.textContent = `Total price: ${order.totalPrice}`;
+            orderDiv.appendChild(orderInfo);
+            orderDiv.appendChild(h1);
+            const ad = document.createElement('div');
+            ad.textContent = 'Address: ' + order.address;
+            const name = document.createElement('div');
+            name.textContent = 'Full name: ' + order.fullName;
+
+
+            orderDiv.appendChild(ad);
+            orderDiv.appendChild(name);
+            const productsContainer = document.createElement('div');
+            productsContainer.classList.add('products-container');
+            let data = {
+                products: order.products
+            }
+
+            console.log(data);
+            fetch('/GetGoodsListById', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Set the content type based on your data format
+                },
+                body: JSON.stringify(data) // Convert your data to JSON format
+            })
+                .then(response => response.json()) // Parse the JSON response
+                .then(data => {
+                    console.log(data);
+                    data = data.productArrayList;
+                    console.log(data);
+                    let res = countDuplicates(data);
+
+                    console.log(res);
+                    res.forEach(element => {
+                        console.log(element);
+                        displayOneProduct(element.product,element.quantity, productsContainer);
+                    })
+
+
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('Error:', error);
+                });
+            orderDiv.appendChild(productsContainer);
+            historyContainer.appendChild(orderDiv);
+            console.log(order);
+
+        });
+    }
+
+    function displayOneProduct(product,quantity, container){
+        const productDiv = document.createElement('div');
+        const textContent = document.createElement('div');
+        productDiv.onclick = function (){
+            displayProductDetails(product);
+        }
+        productDiv.classList.add('product');
+        textContent.classList.add('product-text')
+        const image = document.createElement('img');
+        image.src = "data:image/jpeg;base64," + product.imageData ;
+        image.style.maxWidth = '100px';
+        image.style.maxHeight = '100px';
+        image.alt = product.name;
+        image.classList.add('product-image');
+        productDiv.appendChild(image);
+
+        const productName = document.createElement('span');
+        productName.textContent = 'Product Name: ' + product.name;
+        textContent.appendChild(productName);
+
+        const price = document.createElement('span');
+        price.textContent = 'Price: $' + product.price;
+        textContent.appendChild(price);
+        const q = document.createElement('span');
+        q.textContent = 'Quantity: ' + quantity;
+        textContent.appendChild(q);
+
+
+        productDiv.appendChild(textContent);
+        container.appendChild(productDiv);
+    }
+    var currentPage = 1;
+    var itemsPerPage = 15;
+    var role;
+    window.onload =  async function () {
+        if(userId!==undefined) {
+            let d = {
+                token: userId,
+                name: "Artem Volyk",
+                email: "volikartem6@gmail.com"
+            }
+            console.log(d);
+            fetch('/AddUser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(d)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Do something with the response data
+                    console.log(data);
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('Error:', error);
+                });
+        }
+        console.log(userId);
+        role = getUserRole();
+        console.log(role);
+        let location = getParameterByName('location');
+        let data;
+        console.log(location);
+
+        console.log(userId);
+
+        fetchBasket();
+        console.log(cartItems);
+        await displayHeader();
+        if (location === "product_details") {
+
+            let product_id = getParameterByName("product_id");
+            console.log(product_id);
+            data = {products: [product_id]};
+            fetch('/GetGoodById', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Set the content type based on your data format
+                },
+                body: JSON.stringify(data) // Convert your data to JSON format
+            })
+                .then(response => response.json()) // Parse the JSON response
+                .then(data => {
+                    displayProductDetails(data[0]);
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('Error:', error);
+                });
+
+        }
+        else if(location==="order_status"){
+            getAllOrders();
+        }
+        else if(location==="items_in_cart"){
+            fetch('/FetchBasket')
+                .then(response =>  response.json())
+                .then(data => {
+
+                    cartItems = data;
+                    console.log(cartItems);
+                    cartItemCount = data.length;
+                    console.log(data.length);
+                    document.getElementById('cartItemCount').textContent = cartItemCount;
+                    showBasketItems();
+                })
+                .catch(error => console.error('Error:', error));
+
+        }
+        else if(location ==="order_history"){
+            showOrdersHistory();
+        }
+        else{
+            await displayMainPage();
+        }
+
+
+    };
+    async function displayMainPage() {
+        clearSearchParams();
+        hideAllFragments("home");
+        var res = null;
+
+        currentPage = getParameterByName('page');
+        if (currentPage === null || isNaN(currentPage)) {
+            currentPage = 1;
+        } else {
+            currentPage = parseInt(currentPage);
+        }
+
+        await fetchData();
+
+        document.getElementById('loadMoreButton').addEventListener('click', loadMoreGoods);
+        document.getElementById('previousPageButton').addEventListener('click', previousPage);
+    }
+
+    function displayGoods(products) {
+        var goodsGridElement = document.getElementById('goodsGrid');
+
+        // Clear existing content
+        goodsGridElement.innerHTML = '';
+
+        // Calculate start and end index for current page
+        var startIndex = (currentPage - 1) * itemsPerPage;
+        var endIndex = currentPage * itemsPerPage;
+
+        // Loop through the list of goods and create div containers
+        for (var i = startIndex; i < Math.min(endIndex, products.length); i++) {
+            var product = products[i];
+            const div = document.createElement('div');
+            div.classList.add('good');
+
+            console.log(product);
+            div.innerHTML = '<div class="good-image"><img src="data:image/jpeg;base64,' + product.imageData + '" alt="' + product.name + '"></div>' +
+                '<div class="good-details">' +
+                '<div class="good-name">' + product.name + '</div>' +
+                '<div class="good-price">$' + product.price + '</div>' +
+                '</div>';
+            (function (product) {
+                // Add event listener to call "foo" method when div is clicked and pass the good object
+                div.addEventListener('click', function () {
+                    console.log('here');
+                    displayProductDetails(product);
+                });
+            })(product);
+            goodsGridElement.appendChild(div);
+        }
+
+        // Show or hide the load more button based on pagination
+        var loadMoreButton = document.getElementById('loadMoreButton');
+        if (endIndex < products.length) {
+            loadMoreButton.style.display = 'block';
+        } else {
+            loadMoreButton.style.display = 'none';
+        }
+
+        // Enable or disable the previous page button based on current page
+        var previousPageButton = document.getElementById('previousPageButton');
+        if (currentPage > 1) {
+            previousPageButton.disabled = false;
+        } else {
+            previousPageButton.disabled = true;
+        }
+    }
+
+    function loadMoreGoods() {
+        currentPage++;
+        setCurrentPageParam(currentPage);
+        fetchData();
+    }
+
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            setCurrentPageParam(currentPage);
+            fetchData();
+        }
+    }
+
+    function fetchData() {
+        console.log("fetch");
+        fetch('/GoodServlet')
+            .then(response =>  response.json())
+            .then(data => {
+                console.log(data);
+                console.log(data);
+                displayGoods(data);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    // Function to set the current page URL parameter
+    function setCurrentPageParam(pageNumber) {
+        var url = new URL(window.location.href);
+        url.searchParams.set('page', pageNumber);
+        window.history.replaceState({}, '', url);
+    }
+
+
+
+    async function getUserRole() {
+        let role;
+        let data = {
+            userId: getUserIdFromToken(userId)
+        }
+        /*await fetch('/GetUserRole', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+            .then(async response => await response.json()) // Parse the JSON response
+            .then(data => {
+                console.log(data);
+                data  = data.response;
+                const obj = JSON.parse(data);
+                console.log(obj);
+                role = obj[0].name;
+                console.log(role);
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('Error:', error);
+            });*/
+        return "Admin";
+    }
+
+    async function  displayHeader(){
+        role = await getUserRole();
+        console.log(role);
+        if(role==="Admin"){
+            document.getElementById("get-all-orders").style.display = 'block';
+            document.getElementById('additem').style.display = 'block';
+        }
+
+    }
+
+    function setCurrentProductParam(id) {
+        var url = new URL(window.location.href);
+
+        url.searchParams.set('product_id', id);
+        window.history.replaceState({}, '', url);
+        console.log("here");
+    }
+    async function displayProductDetails(product) {
+        clearSearchParams();
+        setCurrentLocation('product_details');
+        setCurrentProductParam(product.id);
+
+        hideAllFragments("product-details");
+
+        var goodDetailsElement = document.getElementById('goodDetails');
+        goodDetailsElement.innerHTML = "";
+
+
+        var good = {
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            imageData: product.imageData
+        };
+        console.log(product);
+        //console.log("displayGoodDetails");
+
+        const productDiv = document.createElement('div');
+        const textContent = document.createElement('div');
+        productDiv.classList.add('product-details');
+        textContent.classList.add('product-text')
+        const image = document.createElement('img');
+        image.src = "data:image/jpeg;base64," + product.imageData ;
+
+        image.alt = product.name;
+        image.classList.add('product-image');
+        productDiv.appendChild(image);
+
+        const productName = document.createElement('span');
+        productName.textContent = 'Product Name: ' + product.name;
+        textContent.appendChild(productName);
+
+        const price = document.createElement('span');
+        price.textContent = 'Price: $' + product.price;
+        const btn = document.createElement('button');
+        btn.addEventListener("click", function (){
+            addToCart(product);
+        })
+        btn.textContent = "Add to Cart";
+        btn.classList.add("add-to-cart-button");
+        textContent.appendChild(price);
+        textContent.appendChild(btn);
+        productDiv.appendChild(textContent);
+        goodDetailsElement.appendChild(productDiv);
+
+
+        window.productId = product.id;
+        console.log("window " + window.productId);
+        const good_id = window.productId;
+
+        await fetchReviews(product.id);
+    }
+
+
+
+    async function fetchReviews( good_id){
+        console.log(good_id);
+        const data = {
+            goodId: good_id
+        };
+        fetch('/GetReviews', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Set the content type based on your data format
+            },
+            body: JSON.stringify(data) // Convert your data to JSON format
+        })
+            .then(response =>  response.json())
+            .then(data => {
+                console.log(data);
+                renderExistingReviews(data.listOfReviews);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
+
+    function renderExistingReviews(reviews) {
+
+        //console.log(reviews);
+
+        const reviewsList = document.getElementById("reviewsList");
+        reviewsList.innerHTML = "";
+
+        reviews.forEach(review => {
+            console.log(review);
+            let fullName = null;
+            let data = {
+                userId :    (review.clientid)
+            }
+            fetch('/GetUserInfo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Set the content type based on your data format
+                },
+                body: JSON.stringify(data) // Convert your data to JSON format
+            })
+                .then(response => response.json()) // Parse the JSON response
+                .then(async data => {
+                    data = data.response;
+                    const obj = JSON.parse(data);
+                    console.log(obj);
+                    const full_name = obj.user_metadata.full_name;
+
+                    // Create a container for the review content
+                    const reviewContent = document.createElement("div");
+                    reviewContent.classList.add("review-content");
+
+                    // Display the author's full name
+                    const authorName = document.createElement("div");
+                    authorName.classList.add("author-name");
+                    role = await getUserRole();
+                    if(role==="Admin"){
+                        authorName.innerHTML = full_name + "(" + review.clientid + ")";
+                    }
+                    else {
+                        authorName.innerHTML = full_name;
+                    }
+                    authorName.style.fontSize = "12px"; // Smaller font size
+                    authorName.style.color = "#888"; // Shade of gray
+
+                    // Display the review grade as stars
+                    const ratingStars = document.createElement("div");
+                    ratingStars.classList.add("rating-stars");
+                    for (let i = 0; i < review.stars; i++) {
+                        const starIcon = document.createElement("span");
+                        starIcon.innerHTML = "&#9733;"; // Star symbol
+                        ratingStars.appendChild(starIcon);
+                    }
+
+                    // Display the review text
+                    const reviewText = document.createElement("div");
+                    reviewText.textContent = review.text;
+
+                    // Append all elements to the review content container
+                    reviewContent.appendChild(authorName);
+                    reviewContent.appendChild(ratingStars);
+                    reviewContent.appendChild(reviewText);
+
+                    // Create a list item for the review content
+                    const listItem = document.createElement("div");
+                    listItem.appendChild(reviewContent);
+
+                    // Append the list item to the reviews list
+                    reviewsList.appendChild(listItem);
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('Error:', error);
+                });
+        });
+    }
+
+
+    function getSelectedStars() {
+        // Get all star elements
+        var stars = document.querySelectorAll('.rating  .radio-btn');
+
+        // Initialize counter for selected stars
+        var selectedStars = 0;
+
+        // Iterate over star elements
+        stars.forEach(function(star) {
+            // Check if the star is checked
+            if (star.checked) {
+                console.log("here");
+                console.log(star.value);
+                // Increment the counter if the star is checked
+                selectedStars =  star.value;
+            }
+        });
+
+        // Return the number of selected stars
+        return selectedStars;
+    }
+    async function addReview() {
+        const stars = document.querySelectorAll('.rating input[type="radio"]');
+        let selectedRating = getSelectedStars();
+
+
+        var text = document.getElementById('review').value;
+
+        document.getElementById('review').value = '';
+        stars.forEach(function (star) {
+            // Check if the star is checked
+            if (star.checked) {
+                star.checked = false;
+            }
+        });
+
+        //const accessToken = await accessCode();
+
+        let data = {
+            userToken : getUserIdFromToken(userId),
+            goodId: window.productId,
+            text: text,
+            rating: selectedRating
+        }
+        console.log(data);
+        fetch('/AddReview', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Set the content type based on your data format
+            },
+            body: JSON.stringify(data)
+        })
+            .then(function (response) {
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            });
+    }
+
+
+    function getAllOrders(){
+        clearSearchParams();
+        setCurrentLocation('order_status');
+        hideAllFragments("orders");
+        fetch('/GetAllOrders')
+            .then(response =>  response.json())
+            .then(data => {
+                console.log(data);
+                data = data.listOfOrders;
+
+                let filteredOrders = data.filter(order => order.status !== "Delivered");
+                filteredOrders = filteredOrders.sort(function(a,b){
+                    let dateA = (a.order_date);
+                    let dateB = (b.order_date);
+
+                    // Compare the dates
+                    return dateA - dateB;
+                });
+                console.log(filteredOrders);
+                displayOrderHistory(filteredOrders);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function displayOrderHistory(orders){
+
+        console.log(orders);
+        const historyContainer = document.getElementById('orders');
+        historyContainer.innerHTML = '';
+
+        orders.forEach(order => {
+            const orderDiv = document.createElement('div');
+            orderDiv.classList.add('order');
+
+            const orderInfo = document.createElement('div');
+            orderInfo.textContent = `Order ID: ${order.orderId}, Date: ${order.order_date}, Status: ${order.status}`;
+            const h1 = document.createElement('p');
+            h1.textContent = `Total price: ${order.totalPrice}`;
+            orderDiv.appendChild(orderInfo);
+            orderDiv.appendChild(h1);
+
+            // Select element for changing status
+            const statusSelect = document.createElement('select');
+
+
+            // Options for status
+            const statusOptions = ["Pending", "Processing", "Shipping", "Delivered"];
+            statusOptions.forEach(option => {
+                const optionElem = document.createElement('option');
+                optionElem.value = option;
+                optionElem.textContent = option.charAt(0).toUpperCase() + option.slice(1);
+                statusSelect.appendChild(optionElem);
+            });
+            const changeStatusBtn = document.createElement('button');
+            changeStatusBtn.textContent = 'Change Status';
+            changeStatusBtn.addEventListener('click', () => {
+                // Assuming you have a function to change the status
+                changeOrderStatus(order.orderId, statusSelect.value);
+            });
+            orderDiv.appendChild(changeStatusBtn);
+            // Set the selected option to the current status
+            statusSelect.value = order.status;
+
+            orderDiv.appendChild(statusSelect);
+
+            const ad = document.createElement('div');
+            ad.textContent = 'Address: ' + order.address;
+            const name = document.createElement('div');
+            name.textContent = 'Full name: ' + order.fullName;
+            const user_id = document.createElement('div');
+            user_id.textContent ='Client id: ' + order.clientId;
+
+            orderDiv.appendChild(ad);
+            orderDiv.appendChild(name);
+            orderDiv.appendChild(user_id);
+
+            const productsContainer = document.createElement('div');
+            productsContainer.classList.add('products-container');
+            let data = {
+
+                products: order.products
+            }
+
+            fetch('/GetGoodsListById', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Set the content type based on your data format
+                },
+                body: JSON.stringify(data) // Convert your data to JSON format
+            })
+                .then(response => response.json()) // Parse the JSON response
+                .then(data => {
+                    data = data.productArrayList;
+                    let res = countDuplicates(data);
+                    console.log(res);
+                    res.forEach(element => {
+                        console.log(element);
+                        displayOneProduct(element.product,element.quantity, productsContainer);
+                    })
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error('Error:', error);
+                });
+            orderDiv.appendChild(productsContainer);
+            historyContainer.appendChild(orderDiv);
+        });
+    }
+    function saveOrderStatus(orderId, status) {
+        // Your implementation to save the status goes here
+    }
+
+    // Function to change the status of an order
+    function changeOrderStatus(orderId, new_status) {
+        console.log("changeOrderStatus");
+        let data = {
+            orderId: orderId,
+            status : new_status
+        }
+
+        fetch('/ChangeOrderStatus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).catch(error => {
+            // Handle any errors
+            console.error('Error:', error);
+        });
+    }
+    function setCurrentClientId(id){
+        var url = new URL(window.location.href);
+
+        url.searchParams.set('client_id', id);
+        window.history.replaceState({}, '', url);
+
+    }
+    function showBasketItems() {
+
+        clearSearchParams();
+        setCurrentLocation('items_in_cart');
+
+        hideAllFragments("itemsInCart");
+
+        console.log("showBasketItems");
+
+        displayItems(cartItems);
+
+        console.log(cartItems);
+    }
+
+    function displayItems(data){
+        const container = document.getElementById('itemsInCartContainer');
+        const textContent = document.createElement('div');
+        container.innerHTML = '';
+        let res = countDuplicates(data);
+        res.forEach(item => {
+            displayOneProduct(item.product,item.quantity, container);
+        });
+        // Display the checkout section after items are loaded
+        document.getElementById('checkoutSection').style.display = 'block';
+        let price =0;
+        for(let i =0; i < cartItems.length; i++){
+            price+=cartItems[i].price;
+        }
+        let currentDate = new Date();
+        document.getElementById('totalPrice').textContent = price + "$";
+        document.getElementById('orderDate').textContent = currentDate.toLocaleDateString();
+    }
+    function displayConfirmation(cost) {
+        return new Promise((resolve, reject) => {
+            const confirmationDialog = document.getElementById("confirmationDialog");
+            const addressInput = document.getElementById("addressInput");
+
+            const confirmBtn = document.getElementById("confirmBtn");
+            const cancelBtn = document.getElementById("cancelBtn");
+
+            confirmBtn.addEventListener("click", () => {
+                const address = addressInput.value.trim();
+                if (address.length < 5) {
+                    alert("Please enter a valid address (at least 5 characters).");
+                    return; // Prevent further execution
+                }
+                console.log(address);
+                resolve(address); // Pass the address as resolved value
+                confirmationDialog.style.display = "none";
+            });
+
+            cancelBtn.addEventListener("click", () => {
+                reject("Purchase canceled by user");
+                confirmationDialog.style.display = "none";
+            });
+
+            confirmationDialog.style.display = "block";
+        });
+    }
+
+    function buy() {
+        let price =0;
+        for(let i =0; i < cartItems.length; i++){
+            price+=cartItems[i].price;
+        }
+        displayConfirmation(price)
+            .then(async (address) => {
+                // User confirmed, proceed with purchase logic
+                let currentDate = new Date();
+                console.log(currentDate.getHours());
+                const obj = await getUserData();
+                console.log(obj);
+                const json_obj = JSON.parse(obj);
+                console.log(json_obj);
+                const full_name = json_obj.user_metadata.full_name;
+                console.log('Address '+ address);
+                console.log(obj);
+                products_ids = [];
+                for (let i=0; i < cartItems.length;i++){
+                    products_ids.push(cartItems[i].productId);
+                }
+                const d = {
+                    products: products_ids,
+                    date: currentDate,
+                    userId: userId,
+                    address: address,
+                    fullName: full_name
+                };
+                console.log(full_name);
+                console.log(d);
+                fetch('/MakeOrder', {
+                    method: 'POST',
+                    body: JSON.stringify(d)
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                    });
+                cartItems = [];
+                cartItemCount = 0;
+
+
+            })
+            .catch((error) => {
+                // User canceled the purchase
+                console.log(error);
+            });
+    }let cartItemCount = 0;
+    let cartItems = [];
+
+    function fetchBasket(){
+        console.log("fetchBasket");
+        let data = {
+            userId: userId
+        }
+        fetch('/FetchBasket', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', // Set the content type based on your data format
+            },
+            body: JSON.stringify(data) // Convert your data to JSON format
+        })
+            .then(response => response.json()) // Parse the JSON response
+            .then(data => {
+                data = data.productsInBasket;
+                console.log(data);
+                cartItems = data;
+                cartItemCount = data.length;
+                console.log(data.length);
+                document.getElementById('cartItemCount').textContent = cartItemCount;
+            })
+            .catch(error => {
+                // Handle any errors
+                console.error('Error:', error);
+            });
+
+
+
+    }
+
+    function addToCart(product) {
+        cartItemCount++;
+        console.log(cartItemCount);
+        cartItems.push({ name: product.name, price: product.price,productId: product.productId,imageData: product.imageData });
+        document.getElementById('cartItemCount').textContent = cartItemCount;
+        console.log('Added ' + product.name + ' to cart. Price: $' + product.price + " " + product.productId);
+        console.log(cartItems[cartItems.length -1]);
+        const data = {
+            productId: product.productId,
+            userId: getUserIdFromToken(userId)
+        };
+        fetch('/AddItemToBasket', {
+            method: 'POST',
+
+            body: JSON.stringify(data)
+        })
+            .then(function(response) {
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            });
+
+    }
+
+    function displayBasketItems() {
+        let res = countDuplicates(cartItems);
+        console.log(res);
+        var basketItemsContainer = document.getElementById('basketItemsContainer');
+        basketItemsContainer.innerHTML = ''; // Clear previous content
+
+        if (cartItems.length === 0) {
+            basketItemsContainer.textContent = 'No items added';
+        } else {
+            res.forEach(function(element, index) {
+                const item = element.product;
+                const itemElement = document.createElement('div');
+                itemElement.onclick = function (){
+                    displayProductDetails(item);
+                }
+
+                const imgElement = document.createElement('img');
+                imgElement.src = "data:image/jpeg;base64," + item.imageData ;
+                imgElement.style.maxWidth = '100px';
+                imgElement.style.maxHeight = '100px';
+                imgElement.alt = item.name; // Set alt text for accessibility
+
+                itemElement.appendChild(imgElement);
+
+                // Create and append name and price text
+                const itemInfo = document.createElement('div');
+                itemInfo.textContent = item.name + ' - $' + item.price;
+                const quantity = document.createElement('p');
+                quantity.textContent = 'Quantity: ' + element.quantity;
+
+
+
+                // Create remove button using Bootstrap's cross icon
+                const removeButton = document.createElement('button');
+                removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-times" viewBox="0 0 16 16"><path d="M3.854 3.146a.5.5 0 0 1 0 .708L8.207 8l-4.353 4.146a.5.5 0 0 1-.708-.708L7.793 8 3.146 3.854a.5.5 0 0 1 0-.708z"/><path d="M12.854 3.146a.5.5 0 0 0-.708 0L8 7.793l-4.146-4.647a.5.5 0 1 0-.708.708L7.293 8l-4.647 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.647a.5.5 0 0 0 .708-.708L8.707 8l4.647-4.146a.5.5 0 0 0 0-.708z"/></svg>';
+                removeButton.classList.add('btn', 'remove-button'); // Add Bootstrap button classes
+                removeButton.onclick = function() {
+                    removeItemFromCart(index);
+                };
+                removeButton.style.padding = '5px'
+                itemInfo.appendChild(removeButton);
+
+                itemInfo.appendChild(quantity);
+                itemElement.appendChild(itemInfo);
+                basketItemsContainer.appendChild(itemElement);
+            });
+        }
+
+        basketItemsContainer.classList.add('show'); // Show the container
+
+        // Add event listener to hide basket items list when mouse moves away from both basket icon and basket items list
+        basketItemsContainer.addEventListener('mouseleave', hideBasketItems);
+    }
+    function hideBasketItems() {
+        var basketItemsContainer = document.getElementById('basketItemsContainer');
+        basketItemsContainer.classList.remove('show'); // Hide the container
+    }
+
+    function removeItemFromCart(index) {
+        console.log(getUserIdFromToken(userId));
+        const data = {
+            productId: cartItems[index].productId,
+            userId: getUserIdFromToken(userId)
+        };
+        //console.log('removeItemFromCart');
+        // Remove item from cartItems array
+        cartItems.splice(index, 1);
+        // Update cartItemCount
+        cartItemCount--;
+        document.getElementById('cartItemCount').textContent = cartItemCount;
+        // Display updated basket items
+        displayBasketItems();
+
+        fetch('/RemoveItemFromBasket', {
+            method: 'POST',
+
+            body: JSON.stringify(data)
+        })
+            .then(function(response) {
+                //console.log(response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            });
+    }
+    async function addItem() {
+        // Retrieve values from form
+        var itemName = document.getElementById('itemName').value;
+        var itemPrice = document.getElementById('itemPrice').value;
+        var itemQuantity = document.getElementById('itemQuantity').value;
+        var itemDescription = document.getElementById('itemDescription').value;
+        var fileInput = document.getElementById('fileUploader');
+        var file = fileInput.files[0];
+        const base64String = await imageToBase64(file);
+        console.log(base64String);
+        console.log(itemName, itemPrice, itemQuantity, itemDescription);
+        let data = {
+            name: itemName,
+            price: itemPrice,
+
+            description: itemDescription,
+            imageData: base64String
+        }
+        console.log(data);
+        fetch('/AddProduct', {
+            method: 'POST',
+            headers : {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(function (response) {
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            });
+        $('#successMessage').addClass('show');
+        setTimeout(function () {
+            $('#successMessage').removeClass('show');
+        }, 3000); // Hide after 3 seconds
+
+        // Fade out the success message after a delay
+        setTimeout(function () {
+            $('#successMessage').css('opacity', 0);
+        }, 2000); // Fade out over 2 seconds, adjust as needed
+        $('#addItemModal').modal('hide');
+
+
+        document.getElementById('addItemForm').reset();
+
+    }
+
+    var fileInput = document.getElementById('fileUploader');
+    var fileDropArea = document.getElementById('fileDropArea');
+
+    // Prevent default behavior (open file in browser)
+    fileDropArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        fileDropArea.classList.add('dragover');
+    });
+
+    // Handle drag leave
+    fileDropArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        fileDropArea.classList.remove('dragover');
+    });
+
+    // Handle file drop
+    fileDropArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        fileDropArea.classList.remove('dragover');
+        var files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+
+    // Handle file selection from input
+    fileInput.addEventListener('change', function(e) {
+        var files = e.target.files;
+        handleFiles(files);
+    });
+
+
+    function handleFiles(files) {
+        var fileList = files;
+
+        console.log(fileList);
+    }
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

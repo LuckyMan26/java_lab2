@@ -1,0 +1,139 @@
+.product-details {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+    display: flex;
+
+
+}
+.product-details img {
+    width: 100%;
+    max-height: 600px;
+    border-radius: 5px;
+
+}
+.product-details .text {
+    display: flex;
+    flex-direction: column;
+}
+.product-details h2 {
+    margin-top: 0;
+}
+.product-details p {
+    margin: 0;
+}
+
+.review-form {
+
+
+    margin: 20px auto;
+    max-width: 100%;
+    padding: 20px;
+    position: relative;
+
+}
+.review-form h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+label {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+input[type="text"],
+textarea,
+select {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    padding: 10px;
+    width: 100%;
+}
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23444444" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 12L6 8h8l-4 4z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px top 50%;
+    background-size: 14px;
+    padding-right: 30px;
+}
+textarea {
+    resize: vertical;
+}
+button[type="submit"] {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+
+.txt-center {
+    text-align: center;
+}
+.hide {
+    display: none;
+}
+
+.clear {
+    float: none;
+    clear: both;
+}
+
+.rating {
+    width: 90px;
+    unicode-bidi: bidi-override;
+    direction: rtl;
+    text-align: center;
+    position: relative;
+}
+
+.rating > label {
+    float: right;
+    display: inline;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    width: 1.1em;
+    cursor: pointer;
+    color: #000;
+}
+
+.rating > label:hover,
+.rating > label:hover ~ label,
+.rating > input.radio-btn:checked ~ label {
+    color: transparent;
+}
+
+.rating > label:hover:before,
+.rating > label:hover ~ label:before,
+.rating > input.radio-btn:checked ~ label:before,
+.rating > input.radio-btn:checked ~ label:before {
+    content: "\2605";
+    position: absolute;
+    left: 0;
+    color: #FFD700;
+}
+
+.review-content{
+    background-color: #f9f9f9;
+    padding: 10px;
+}
